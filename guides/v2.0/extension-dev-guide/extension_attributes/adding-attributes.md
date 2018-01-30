@@ -161,8 +161,8 @@ For scalar attributes we can use next configuration:
 {% highlight xml %}
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
     <extension_attributes for="Magento\Catalog\Api\Data\ProductInterface">
-        <attribute code="first_custom_attribute" type="Magento\SomeModule\Api\Data\CustomDataInterface" />
-        <attribute code="second_custom_attribute" type="Magento\SomeModule\Api\Data\CustomDataInterface" />
+        <attribute code="first_custom_attribute" type="int" />
+        <attribute code="second_custom_attribute" type="string" />
     </extension_attributes>
 </config>
 {% endhighlight %}
@@ -171,7 +171,17 @@ For non-scalar attributes:
 {% highlight xml %}
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
     <extension_attributes for="Magento\Catalog\Api\Data\ProductInterface">
-        <attribute code="our_custom_data" type="Magento\SomeModule\Api\Data\CustomDataInterface[]" />
+        <attribute code="our_custom_data" type="Magento\SomeModule\Api\Data\CustomDataInterface" />
+    </extension_attributes>
+</config>
+{% endhighlight %}
+
+For array attributes:
+{% highlight xml %}
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
+    <extension_attributes for="Magento\Catalog\Api\Data\ProductInterface">
+        <attribute code="custom_ids" type="int[]" />
+        <attribute code="more_custom_data" type="Magento\SomeModule\Api\Data\CustomDataInterface[]" />
     </extension_attributes>
 </config>
 {% endhighlight %}
@@ -185,7 +195,7 @@ In first case we will get the next result:
     <custom_attributes><!-- Custom Attributes Data --></custom_attributes>
     <extension_attributes>
         <first_custom_attribute>1</first_custom_attribute>
-        <second_custom_attribute>2</second_custom_attribute>
+        <second_custom_attribute>two</second_custom_attribute>
     </extension_attributes>
 </product>
 {% endhighlight %}
@@ -201,6 +211,31 @@ In second one:
                 <first_custom_attribute>1</first_custom_attribute>
                 <second_custom_attribute>2</second_custom_attribute>
         </our_custom_data>
+    </extension_attributes>
+</product>
+{% endhighlight %}
+
+In third one:
+{% highlight xml %}
+<product>
+    <id>1</id>
+    <sku>some-sku</sku>
+    <custom_attributes><!-- Custom Attributes Data --></custom_attributes>
+    <extension_attributes>
+        <custom_ids>
+            <item>2</item>
+            <item>3</item>
+        </custom_ids>
+        <more_custom_data>
+            <item>
+                <first_custom_attribute>1</first_custom_attribute>
+                <second_custom_attribute>2</second_custom_attribute>
+            </item>
+            <item>
+                <first_custom_attribute>10</first_custom_attribute>
+                <second_custom_attribute>11</second_custom_attribute>
+            </item>
+        </more_custom_data>
     </extension_attributes>
 </product>
 {% endhighlight %}
