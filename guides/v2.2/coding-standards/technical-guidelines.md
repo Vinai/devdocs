@@ -438,6 +438,119 @@ class View extends Template
 ---
 2.17.3. Strategy SHOULD be used when there are multiple algorithms for performing an operation.
 
+2.18 Interface contracts SHOULD be observed. If a specific implementation is used by the code, the declared dependency SHOULD on the concrete type and not the more generic interface.
+In exceptional cases, when dealing with legacy code, a downcast from a generic to a more specific type may required. In such situations it MUST be handled gracefully so no exception is thrown if the downcast can't be done.
+
+{% collapsible Example #1: %}
+<table>
+    <tr>
+        <th><span style="color: red">Not recommended</span></th>
+        <th><span style="color: green">Recommended</span></th>
+    </tr>
+    <tr>
+        <td>
+{% highlight php %}
+class PostDataExtractor
+{
+    /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    private $request;
+
+    public function __construct(\Magento\Framework\App\RequestInterface $request)
+    {
+        $this->request = $request;
+    }
+
+    public function getPostedName()
+    {
+        // Using getPost() is a violation of the interface contract
+        // because the RequestInterface does not contain the method.
+        // The stated constructor dependency is not correct, because
+        // the de-facto dependency is on a concrete implementation.
+        $this->request->getPost('name');
+    }
+}
+
+{% endhighlight %}
+        </td>
+        <td>
+{% highlight php %}
+class PostDataExtractor
+{
+    /**
+     * @var \Magento\Framework\App\Request\Http
+     */
+    private $request;
+
+    public function __construct(\Magento\Framework\App\Request\Http $request)
+    {
+        $this->request = $request;
+    }
+
+    public function getPostedName()
+    {
+        // The HTTP request implementation contains a getPost() method,
+        // so the class dependency on the concrete type makes the
+        // the existing dependency explicit. 
+        $this->request->getPost('name');
+    }
+}
+{% endhighlight %}
+        </td>
+    </tr>
+</table>
+{% endcollapsible %}
+
+---
+
+{% collapsible Example #2: %}
+<table>
+    <tr>
+        <th><span style="color: red">Not recommended</span></th>
+        <th><span style="color: green">Recommended</span></th>
+    </tr>
+    <tr>
+        <td>
+{% highlight php %}
+class CustomFrontController implements \Magento\Framework\App\FrontControllerInterface
+{
+    public function dispatch(\Magento\Framework\App\RequestInterface $request)
+    {
+        // This code requires access to the a header value,
+        // but calling getHeader() violates the interface contract.
+        // The signature of the dispatch() method however is dictated 
+        // by the implementd interface and can not be changed.
+        // This will lead to a runtime error if a different implementation
+        // of the interface is passed as an argument.
+        $type = $request->getHeader('Content-Type');
+        // ...
+    }
+}
+{% endhighlight %}
+        </td>
+        <td>
+{% highlight php %}
+class CustomFrontController implements \Magento\Framework\App\FrontControllerInterface
+{
+    public function dispatch(\Magento\Framework\App\RequestInterface $request)
+    {
+        // In case of dealing with legacy code like this, a type check
+        // can be used to avoid runtime errors.
+        if ($request instanceof \Magento\Framework\App\Request\Http) {
+            $request->getHeader('Content-Type');
+            // ...
+        }
+        // Perform some null action that does not cause a runtime error
+        // ...
+    }
+}
+{% endhighlight %}
+        </td>
+    </tr>
+</table>
+{% endcollapsible %}
+
 ## 3. Dependency injection
 
 3.1. There SHOULD be no circular dependencies between objects.
