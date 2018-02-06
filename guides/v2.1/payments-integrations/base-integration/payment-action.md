@@ -51,7 +51,7 @@ Configuring the gateway command and adding it to command pool (`app/code/Magento
 {% endhighlight %}
 
 
-In the command configuration we see that `BraintreeAuthorizeRequest` is specified as `requestBuilder`, that is a
+In the command configuration we see that `BraintreeAuthorizeRequest` is specified as `requestBuilder`, that is defined as a virtualType.
 Let's look closer on the `requestBuilder` arguments. This argument value is a list of builders, builder composite.  
 
 The `BraintreeAuthorizeRequest` builder contains the following builders (`app/code/Magento/Braintree/etc/di.xml`):
